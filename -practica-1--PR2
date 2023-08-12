@@ -1,0 +1,262 @@
+using System;
+
+namespace PeluqueriaCanina
+{
+    public class Cliente
+    {
+        public string Nombre { get; set; }
+        public int Edad { get; set; }
+        public bool YaFueAtendido { get; set; }
+        public bool TienePulgas { get; set; }
+        public double Precio { get; set; }
+        public string Dueño { get; set; }
+
+        public Cliente(string nombre, int edad, string dueño)
+        {
+            Nombre = nombre;
+            Edad = edad;
+            Dueño = dueño;
+            YaFueAtendido = false;
+            TienePulgas = false;
+        }
+
+        public virtual void Atender()
+        {
+            YaFueAtendido = true;
+            Random random = new Random();
+            int probabilidadPulgas = random.Next(1, 101);
+            if (probabilidadPulgas <= 40)
+                TienePulgas = true;
+        }
+
+        public static Cliente operator +(Cliente cliente, double incremento)
+        {
+            cliente.Precio += incremento;
+            return cliente;
+        }
+
+        public virtual string Tamaño()
+        {
+            return "";
+        }
+    }
+
+    public class PerroPequeño : Cliente
+    {
+        public PerroPequeño(string nombre, int edad, string dueño) : base(nombre, edad, dueño)
+        {
+            Precio = 50;
+        }
+
+        public override string Tamaño()
+        {
+            return "Pequeño";
+        }
+    }
+
+    public class PerroMediano : Cliente
+    {
+        public PerroMediano(string nombre, int edad, string dueño) : base(nombre, edad, dueño)
+        {
+            Precio = 80;
+        }
+
+        public override string Tamaño()
+        {
+            return "Mediano";
+        }
+    }
+
+    public class PerroGrande : Cliente
+    {
+        public PerroGrande(string nombre, int edad, string dueño) : base(nombre, edad, dueño)
+        {
+            Precio = 120;
+        }
+
+        public override string Tamaño()
+        {
+            return "Grande";
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Cliente[] clientes = new Cliente[0];
+            Console.WriteLine("Bienvenido a la peluquería canina");
+            int intentos = 0;
+            bool salir = false;
+            while (!salir && intentos < 3)
+            {
+                Console.Write("Ingrese el usuario: ");
+                string usuario = Console.ReadLine();
+                Console.Write("Ingrese la contraseña: ");
+                string contraseña = Console.ReadLine();
+                if (usuario == "admin" && contraseña == "admin")
+                {
+                    bool salirMenu = false;
+                    while (!salirMenu)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Menú:");
+                        Console.WriteLine("1. Agregar cliente");
+                        Console.WriteLine("2. Atender cliente");
+                        Console.WriteLine("3. Despachar cliente");
+                        Console.WriteLine("4. Salir");
+                        Console.Write("Ingrese una opción: ");
+                        int opcion = LeerEntero();
+                        switch (opcion)
+                        {
+                            case 1:
+                                string nombre;
+                                do
+                                {
+                                    Console.Write("Ingrese el nombre del perro: ");
+                                    nombre = LeerCadena();
+                                    if (nombre == "")
+                                        Console.WriteLine("Error. Ingrese un nombre válido.");
+                                } while (nombre == "");
+                                int edad;
+                                do
+                                {
+                                    Console.Write("Ingrese la edad del perro: ");
+                                    edad = LeerEntero();
+                                    if (edad < 0)
+                                        Console.WriteLine("Error. Ingrese una edad válida.");
+                                } while (edad < 0);
+                                string dueño;
+                                do
+                                {
+                                    Console.Write("Ingrese el nombre del dueño: ");
+                                    dueño = LeerCadena();
+                                    if (dueño == "")
+                                        Console.WriteLine("Error. Ingrese un nombre válido.");
+                                } while (dueño == "");
+                                Console.WriteLine("Tamaño del perro:");
+                                Console.WriteLine("1. Pequeño");
+                                Console.WriteLine("2. Mediano");
+                                Console.WriteLine("3. Grande");
+                                int tamaño;
+                                do
+                                {
+                                    Console.Write("Ingrese una opción: ");
+                                    tamaño = LeerEntero();
+                                    if (tamaño < 1 || tamaño > 3)
+                                        Console.WriteLine("Opción inválida");
+                                } while (tamaño < 1 || tamaño > 3);
+                                Array.Resize(ref clientes, clientes.Length + 1);
+                                switch (tamaño)
+                                {
+                                    case 1:
+                                        clientes[clientes.Length - 1] = new PerroPequeño(nombre, edad, dueño);
+                                        break;
+                                    case 2:
+                                        clientes[clientes.Length - 1] = new PerroMediano(nombre, edad, dueño);
+                                        break;
+                                    case 3:
+                                        clientes[clientes.Length - 1] = new PerroGrande(nombre, edad, dueño);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                if (tamaño >= 1 && tamaño <= 3)
+                                    Console.WriteLine("Cliente agregado exitosamente");
+                                Console.Write("Presione una tecla para continuar...");
+                                Console.ReadKey();
+                                break;
+                            case 2:
+                                Console.WriteLine("Clientes por atender:");
+                                for (int i = 0; i < clientes.Length; i++)
+                                    if (!clientes[i].YaFueAtendido)
+                                        Console.WriteLine(i + ". " + clientes[i].Nombre);
+                                Console.Write("Ingrese el índice del cliente a atender: ");
+                                int indiceAtender = LeerEntero();
+                                if (indiceAtender >= 0 && indiceAtender < clientes.Length && !clientes[indiceAtender].YaFueAtendido)
+                                {
+                                    clientes[indiceAtender].Atender();
+                                    Console.WriteLine("Cliente atendido exitosamente");
+                                }
+                                else
+                                    Console.WriteLine("Índice inválido");
+                                Console.Write("Presione una tecla para continuar...");
+                                Console.ReadKey();
+                                break;
+                            case 3:
+                                Console.WriteLine("Clientes por despachar:");
+                                for (int i = 0; i < clientes.Length; i++)
+                                    if (clientes[i].YaFueAtendido)
+                                        Console.WriteLine(i + ". " + clientes[i].Nombre);
+                                Console.Write("Ingrese el índice del cliente a despachar: ");
+                                int indiceDespachar = LeerEntero();
+                                if (indiceDespachar >= 0 && indiceDespachar < clientes.Length && clientes[indiceDespachar].YaFueAtendido)
+                                {
+                                    Cliente cliente = clientes[indiceDespachar];
+                                    if (cliente.TienePulgas)
+                                        cliente += 20;
+                                    Console.WriteLine("Factura:");
+                                    Console.WriteLine("----------------------------------------");
+                                    Console.WriteLine("| Nombre del perro: " + cliente.Nombre);
+                                    Console.WriteLine("| Edad del perro: " + cliente.Edad.ToString());
+                                    Console.WriteLine("| Dueño: " + cliente.Dueño);
+                                    Console.WriteLine("| Tamaño: " + cliente.Tamaño());
+                                    Console.WriteLine("| Precio: $" + cliente.Precio.ToString());
+                                    Console.WriteLine("| Tiene pulgas: " + (cliente.TienePulgas ? "Sí" : "No"));
+                                    Console.WriteLine("----------------------------------------");
+                                    for (int i = indiceDespachar; i < clientes.Length - 1; i++)
+                                        clientes[i] = clientes[i + 1];
+                                    Array.Resize(ref clientes, clientes.Length - 1);
+                                    Console.Write("Presione una tecla para continuar...");
+                                    Console.ReadKey();
+                                }
+                                else
+                                    Console.WriteLine("Índice inválido");
+                                break;
+                            case 4:
+                                salirMenu = true;
+                                break;
+                            default:
+                                Console.WriteLine("Opción inválida");
+                                break;
+                        }
+                    }
+                    salir = true;
+                }
+                else
+                {
+                    intentos++;
+                    if (intentos < 3)
+                        Console.WriteLine("Usuario o contraseña incorrectos. Inténtelo de nuevo.");
+                }
+            }
+            if (intentos == 3)
+                Console.WriteLine("Ha superado el número máximo de intentos. El programa se cerrará.");
+        }
+
+        static int LeerEntero()
+        {
+            int entero;
+            while (!int.TryParse(Console.ReadLine(), out entero))
+                Console.WriteLine("Error. Ingrese un número entero.");
+            return entero;
+        }
+
+        static string LeerCadena()
+        {
+            string cadena = "";
+            bool valido = false;
+            while (!valido)
+            {
+                valido = true;
+                cadena = Console.ReadLine();
+                foreach (char c in cadena)
+                    if (!char.IsLetter(c) && c != ' ')
+                        valido = false;
+                if (!valido || cadena == "")
+                    Console.WriteLine("Error. Ingrese solo caracteres.");
+            }
+            return cadena;
+        }
+    }
+}
